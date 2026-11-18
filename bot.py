@@ -1,5 +1,4 @@
 import asyncio
-import tgwsapiproxy
 import logging
 import json
 import os
@@ -9,7 +8,6 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from datetime import datetime, timedelta
 from aiogram.types import FSInputFile, BufferedInputFile, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.client.session.aiohttp import AiohttpSession
 
 # ===================================================
 # 1. НАСТРОЙКИ
@@ -17,7 +15,6 @@ from aiogram.client.session.aiohttp import AiohttpSession
 BOT_TOKEN = "8983642305:AAH4fec67NMDL3zlE2LdgUyianxhxN_YA1E"
 CHAT_ID = -1002734456748
 ADMINS = ["anicardDark", "DanielDerecha", "Dasyero", "Ahahanta", "Zhongli_3112"]
-session = AiohttpSession(proxy="http://127.0.0.1:8080")
 MAX_SCORE = 16
 LOW_SCORE_THRESHOLD = 12
 MAX_WARNINGS = 3
@@ -61,12 +58,10 @@ raid2_event = asyncio.Event()
 raid3_event = asyncio.Event()
 raid_bonus_until = None
 
-# Базовое расписание
 default_raids = {
     1: {"time": "10:55", "members": []}
 }
 
-# Загрузка / сброс расписания
 auto_raids = {}
 
 def load_raids():
@@ -83,7 +78,6 @@ def save_raids():
     save_data(db)
 
 def reset_raids():
-    """Сбрасывает только время рейдов, не трогая участников (запись на завтра сохраняется)."""
     global auto_raids
     for num in default_raids:
         if num in auto_raids:
@@ -286,7 +280,6 @@ async def start_cmd(message: types.Message):
         "*(В 00:00 время рейдов сбрасывается, участники сохраняются)*"
     )
 
-# Список команд для сдачи отчёта
 banana_commands = ["и", "И", "i", "I"] + [f"и{i}" for i in range(17)] + [f"И{i}" for i in range(17)] + [f"i{i}" for i in range(17)] + [f"I{i}" for i in range(17)]
 
 @dp.message(Command(commands=banana_commands))
@@ -1185,7 +1178,6 @@ async def start_raid(raid_num):
     time_str = auto_raids[raid_num]["time"]
     await activate_raid_bonus()
     await bot.send_message(CHAT_ID, f"🚀 РЕЙД №{raid_num} ({time_str}) НАЧАЛСЯ!\nСдавайте отчеты! Бонус ×2 и отсутствие штрафов действуют 35 минут.")
-    # Очищаем участников после старта (запись на сегодня больше не актуальна)
     auto_raids[raid_num]["members"] = []
     save_raids()
 
@@ -1253,15 +1245,10 @@ async def background_tasks():
 # 9. ЗАПУСК
 # ===================================================
 async def main():
-    global bot
     print("🚀 Бот запущен!")
     
-    # Запускаем прокси (он вернет объект, который нужно сохранить)
-    proxy = await tgwsapiproxy.run_proxy("tg-proxy.danil-derecha.workers.dev")
-    
-    # Создаем сессию с прокси
-    session = AiohttpSession(proxy=tgwsapiproxy.proxy_url())
-    bot = Bot(token=BOT_TOKEN, session=session)
+    # Никакого прокси, просто чистый запуск
+    bot = Bot(token=BOT_TOKEN)
     
     await bot.delete_webhook(drop_pending_updates=True)
     asyncio.create_task(background_tasks())
