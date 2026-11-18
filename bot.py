@@ -1254,17 +1254,18 @@ async def background_tasks():
 # ===================================================
 async def main():
     global bot
-
     print("🚀 Бот запущен!")
-    print(f"📅 День сезона: {get_season_day()}")
-
-    # Используйте правильный асинхронный контекстный менеджер
-    async with tgwsapiproxy.run_proxy("tg-proxy.danil-derecha.workers.dev"):
-        # Ключевой момент: используйте proxy_url() для получения адреса
-        session = AiohttpSession(proxy=tgwsapiproxy.proxy_url())
-        
-        bot = Bot(token=BOT_TOKEN, session=session)
-        
-        await bot.delete_webhook(drop_pending_updates=True)
-        asyncio.create_task(background_tasks())
-        await dp.start_polling(bot)
+    
+    # Запускаем прокси (он вернет объект, который нужно сохранить)
+    proxy = await tgwsapiproxy.run_proxy("tg-proxy.danil-derecha.workers.dev")
+    
+    # Создаем сессию с прокси
+    session = AiohttpSession(proxy=tgwsapiproxy.proxy_url())
+    bot = Bot(token=BOT_TOKEN, session=session)
+    
+    await bot.delete_webhook(drop_pending_updates=True)
+    asyncio.create_task(background_tasks())
+    await dp.start_polling(bot)
+    
+if __name__ == "__main__":
+    asyncio.run(main())
