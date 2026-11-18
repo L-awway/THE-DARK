@@ -8,14 +8,15 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from datetime import datetime, timedelta
 from aiogram.types import FSInputFile, BufferedInputFile, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.client.session.aiohttp import AiohttpSession
 
 # ===================================================
 # 1. НАСТРОЙКИ
 # ===================================================
 BOT_TOKEN = "8983642305:AAH4fec67NMDL3zlE2LdgUyianxhxN_YA1E"
 CHAT_ID = -1002734456748
-ADMINS = ["anicardDark", "DanielDerecha", "Dasyero", "Ahahanta", "Zhongli_3112", "Kyoruk", "VISUALTHROUGH"]
-
+ADMINS = ["anicardDark", "DanielDerecha", "Dasyero", "Ahahanta", "Zhongli_3112"]
+session = AiohttpSession(proxy="http://127.0.0.1:8080")
 MAX_SCORE = 16
 LOW_SCORE_THRESHOLD = 12
 MAX_WARNINGS = 3
