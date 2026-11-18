@@ -1,4 +1,5 @@
 import asyncio
+import tgwsapiproxy
 import logging
 import json
 import os
@@ -1252,11 +1253,23 @@ async def background_tasks():
 # 9. ЗАПУСК
 # ===================================================
 async def main():
+    global bot  # <--- Важно!
+
     print("🚀 Бот запущен!")
     print(f"📅 День сезона: {get_season_day()}")
-    await bot.delete_webhook(drop_pending_updates=True)
-    asyncio.create_task(background_tasks())
-    await dp.start_polling(bot)
+
+    # Запускаем прокси. Убедитесь, что адрес верный!
+    async with tgwsapiproxy.run_proxy("tg-proxy.danil-derecha.workers.dev"):
+        
+        # Создаем сессию с прокси
+        session = AiohttpSession(proxy="http://127.0.0.1:8080")
+        
+        # Перезаписываем глобального бота, добавляя ему сессию с прокси
+        bot = Bot(token=BOT_TOKEN, session=session)
+        
+        await bot.delete_webhook(drop_pending_updates=True)
+        asyncio.create_task(background_tasks())
+        await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
